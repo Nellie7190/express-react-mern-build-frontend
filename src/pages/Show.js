@@ -65,3 +65,5 @@ function Show(props) {
         </div>
     )
 }
+
+export default Show;
