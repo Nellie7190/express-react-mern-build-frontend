@@ -4,49 +4,88 @@ import Index from "../pages/Index";
 import Show from "../pages/Show";
 
 function Main(props) {
-  const [ people, setPeople ] = useState(null);
+    // create state to hold about data
+    const [ people, setPeople ] = useState(null);
 
-  const URL = "https://express-react-mern-build1.herokuapp.com/";
+    // create a var URL to be passed into when making API call
+    const URL = "https://express-react-mern-build1.herokuapp.com/people";
+  
+    // create function to make api call
+    const getPeople = async () => {
+        // make api call and get response   
+        const response = await fetch(URL);
+        // turn response into javascript object
+        const data = await response.json();
+        // set the about state to the data
+        setPeople(data);
+    };
+  
+    //we need this function when we fill out a form. 
+    const createPeople = async (person) => {
+      // make post request to create people
+      await fetch(URL, {
+        method: "POST",
+        //so that it knows it's json data
+        headers: {
+          "Content-Type": "Application/json",
+        },
+        //stringify will convert into json format
+        body: JSON.stringify(person),
+      });
+      // update list of people
+      getPeople();
+    };
 
-  const getPeople = async () => {
-    const response = await fetch(URL);
-    const data = await response.json();
-    setPeople(data);
-  };
+    // we need this function to update the data
+    const updatePeople = async (person, id) => {
+      // make put request to create people
+      await fetch(URL + "/" + id, {
+        method: "PUT",
+        //so that it knows it's json data
+        headers: {
+          "Content-Type": "Application/json",
+        },
+        //stringify will convert into json format
+        body: JSON.stringify(person),
+      });
+      // update list of people
+      getPeople();
+    }
 
-  const createPeople = async (person) => {
-    // make post request to create people
-    await fetch(URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "Application/json",
-      },
-      body: JSON.stringify(person),
-    });
-    // update list of people
-    getPeople();
-  };
+    // we need this to delete a person
+    const deletePeople = async id => {
+      // make delete request to create people
+      await fetch(URL + "/" + id, {
+        method: "DELETE",
+      })
+      // update list of people
+      getPeople();
+    }
 
-  //[] <-- can write something in it you want to page to run if it changes, leave empty if you only want to run once
-  useEffect(() => getPeople(), []);
+    // make an initial call for the data inside a useEffect, so it only happens once on component load. [] means run once. 
+    useEffect(() => getPeople(), []);
 
-  return (
-    <main>
-      <Switch>
-        <Route exact path="/">
-          <Index people={people} createPeople={createPeople} />
-        </Route>
-        <Route
-          path="/people/:id"
-          render={(rp) => (
-            <Show
-              {...rp}
+
+    return (
+        <main>
+          <Switch>
+            <Route exact path="/">
+              <Index people={people} createPeople={createPeople} />
+            </Route>
+            <Route
+              path="/people/:id"
+              render={(rp) => (
+                <Show
+                people={people}
+                updatePeople={updatePeople}
+                deletePeople={deletePeople}
+                {...rp}
+              />
+              )}
             />
-          )}
-        />
-      </Switch>
-    </main>
-  );
-}
-
-export default Main;
+          </Switch>
+        </main>
+      );
+    }
+    
+    export default Main;
